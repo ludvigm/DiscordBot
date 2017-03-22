@@ -1,10 +1,8 @@
 'use strict';
 const discord = require('discord.js');
-const async = require('async');
 const Promise = require('promise');
 
 require('dotenv').config();
-
 
 // import the discord.js module
 const Discord = require('discord.js');
@@ -31,7 +29,7 @@ bot.on('ready', () => {
             textchannels.push(channel);
         }
     });
-    currentUsersStatus();
+
 
 });
 
@@ -44,7 +42,8 @@ function currentUsersStatus() {
     var dnd = [];
     var ingame = [];
 
-    new Promise(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
+        if(currUsers.size == 0) reject();
         currUsers.forEach(function (user) {
             switch (user.presence.status) {
                 case 'online':
@@ -67,20 +66,34 @@ function currentUsersStatus() {
                     break;
             }
         });
+
         resolve();
     }).then(function () {
         console.log(offline.length, online.length, idle.length, dnd.length, ingame.length);
-        ingame.forEach(function(game) {
-            console.log(game);
-        })
+
+        var reply = "There are " + online.length + " users online.";
+        if (ingame.length > 0) {
+            reply = reply + "\n games games blabla"
+        }
+        if (idle.length > 0) {
+            reply = reply + "\n" + idle.length + " slackers are AFK."
+        }
+        if (dnd.length > 0) {
+            reply = reply + "\n Users not to disturb: ";
+            dnd.forEach(function (user) {
+                reply = reply + user.username + "\n"
+            })
+        }
+        if(!reply) reject();
+        return Promise.resolve(reply);
+    }).catch(function(err) {
+        console.log(err)
     })
 }
-
 
 //Message listener
 bot.on('message', message => {
     // if the message is "what is my avatar",
-    console.log(message.channel.name);
     if (message.content === '!avatar') {
         // send the user's avatar URL
         message.reply(message.author.avatarURL);
@@ -91,7 +104,13 @@ bot.on('message', message => {
     }
 
     if (message.content === '!game') {
-        message.reply()
+        currentUsersStatus().then(function(str) {
+            console.log("THE DAMN STRING: " + str);
+            if(!str) reject();
+            message.reply(str);
+        }).catch(function() {
+            console.log("error")
+        })
     }
 });
 
