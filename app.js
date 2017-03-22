@@ -1,6 +1,8 @@
 'use strict';
 const discord = require('discord.js');
 const Promise = require('promise');
+const reply = require('./lib/commandResponses');
+const vision = require('./lib/visionapi');
 
 require('dotenv').config();
 
@@ -22,92 +24,31 @@ var voicechannels = [];
 bot.on('ready', () => {
     console.log('I am ready!');
     var channels = bot.channels;
-     channels.forEach(function (channel) {
-     if (channel.type === 'voice') {
-     voicechannels.push(channel);
-     } else if (channel.type === 'text') {
-     textchannels.push(channel);
-     }
-     });
+    channels.forEach(function (channel) {
+        if (channel.type === 'voice') {
+            voicechannels.push(channel);
+        } else if (channel.type === 'text') {
+            textchannels.push(channel);
+        }
+    });
+
+    vision.requestLabels('https://s-media-cache-ak0.pinimg.com/736x/07/c3/45/07c345d0eca11d0bc97c894751ba1b46.jpg');
 });
 
-function currentUsersStatus() {
-
-    var currUsers = bot.users;
-    var offline = [];
-    var online = [];
-    var idle = [];
-    var dnd = [];
-    var ingame = [];
-
-    return new Promise(function (resolve, reject) {
-        if (currUsers.size == 0) reject();
-        currUsers.forEach(function (user) {
-            switch (user.presence.status) {
-                case 'online':
-                    online.push(user);
-                    if (user.presence.game) {
-                        ingame.push({
-                            user: user,
-                            game: user.presence.game
-                        })
-                    }
-                    break;
-                case 'offline':
-                    offline.push(user);
-                    break;
-                case 'idle':
-                    idle.push(user);
-                    break;
-                case 'dnd':
-                    dnd.push(user);
-                    break;
-            }
-        });
-
-        resolve();
-    }).then(function () {
-        console.log(offline.length, online.length, idle.length, dnd.length, ingame.length);
-
-        var reply = "There are " + online.length + " users online.";
-        if (ingame.length > 0) {
-            reply = reply + "\n Ingame:"
-        }
-        if (idle.length > 0) {
-            reply = reply + "\n" + idle.length + " slackers are AFK."
-        }
-        if (dnd.length > 0) {
-            reply = reply + "\n Users not to disturb: ";
-            dnd.forEach(function (user) {
-                reply = reply + user.username + "\n"
-            })
-        }
-        if (!reply) reject();
-        return Promise.resolve(reply);
-    }).catch(function (err) {
-        console.log(err)
-    })
-}
 
 //Message listener
 bot.on('message', message => {
     //Case insensetive commands
-    if(message.content.charAt(0) === '!') {
+    if (message.content.charAt(0) === '!') {
         message.content = message.content.toLowerCase();
     }
-    console.log(message.content);
+
     if (message.content === '!avatar') {
-        // send the user's avatar URL
-        message.reply(message.author.avatarURL);
+        reply.avatar(message);
     }
 
     if (message.content === '!whoison') {
-        currentUsersStatus().then(function (str) {
-            if (!str) reject();
-            message.reply(str);
-        }).catch(function () {
-            console.log("error")
-        })
+        reply.whoison(bot.users, message);
     }
 
 });
