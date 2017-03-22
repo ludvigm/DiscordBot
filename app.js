@@ -32,13 +32,13 @@ bot.on('ready', () => {
         }
     });
 
-    vision.requestLabels('https://s-media-cache-ak0.pinimg.com/736x/07/c3/45/07c345d0eca11d0bc97c894751ba1b46.jpg');
+   // vision.requestLabels('https://s-media-cache-ak0.pinimg.com/736x/07/c3/45/07c345d0eca11d0bc97c894751ba1b46.jpg');
 });
 
 
 //Message listener
 bot.on('message', message => {
-    //Case insensetive commands
+    //Case insensetive Commands
     if (message.content.charAt(0) === '!') {
         message.content = message.content.toLowerCase();
     }
@@ -47,8 +47,22 @@ bot.on('message', message => {
         reply.avatar(message);
     }
 
-    if (message.content === '!whoison') {
+    if (message.content === '!ingame') {
         reply.whoison(bot.users, message);
+    }
+
+    if(message.content === '!catfact') {
+        reply.catfact(message);
+    }
+
+    if(message.content === '!listofcommands' || message.content === '!help') {
+        reply.listofcommands(message);
+    }
+
+    if(message.content.startsWith('!yoda ')) {
+        var sentence = message.content.substr(5);
+        reply.yoda(message,sentence);
+
     }
 
 });
