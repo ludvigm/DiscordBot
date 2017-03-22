@@ -22,15 +22,13 @@ var voicechannels = [];
 bot.on('ready', () => {
     console.log('I am ready!');
     var channels = bot.channels;
-    channels.forEach(function (channel) {
-        if (channel.type === 'voice') {
-            voicechannels.push(channel);
-        } else if (channel.type === 'text') {
-            textchannels.push(channel);
-        }
-    });
-
-
+     channels.forEach(function (channel) {
+     if (channel.type === 'voice') {
+     voicechannels.push(channel);
+     } else if (channel.type === 'text') {
+     textchannels.push(channel);
+     }
+     });
 });
 
 function currentUsersStatus() {
@@ -43,7 +41,7 @@ function currentUsersStatus() {
     var ingame = [];
 
     return new Promise(function (resolve, reject) {
-        if(currUsers.size == 0) reject();
+        if (currUsers.size == 0) reject();
         currUsers.forEach(function (user) {
             switch (user.presence.status) {
                 case 'online':
@@ -73,7 +71,7 @@ function currentUsersStatus() {
 
         var reply = "There are " + online.length + " users online.";
         if (ingame.length > 0) {
-            reply = reply + "\n games games blabla"
+            reply = reply + "\n Ingame:"
         }
         if (idle.length > 0) {
             reply = reply + "\n" + idle.length + " slackers are AFK."
@@ -84,35 +82,37 @@ function currentUsersStatus() {
                 reply = reply + user.username + "\n"
             })
         }
-        if(!reply) reject();
+        if (!reply) reject();
         return Promise.resolve(reply);
-    }).catch(function(err) {
+    }).catch(function (err) {
         console.log(err)
     })
 }
 
 //Message listener
 bot.on('message', message => {
-    // if the message is "what is my avatar",
+    //Case insensetive commands
+    if(message.content.charAt(0) === '!') {
+        message.content = message.content.toLowerCase();
+    }
+    console.log(message.content);
     if (message.content === '!avatar') {
         // send the user's avatar URL
         message.reply(message.author.avatarURL);
     }
 
-    if (message.content === '!test') {
-        console.log(message.author.client.presences)
-    }
-
-    if (message.content === '!game') {
-        currentUsersStatus().then(function(str) {
-            console.log("THE DAMN STRING: " + str);
-            if(!str) reject();
+    if (message.content === '!whoison') {
+        currentUsersStatus().then(function (str) {
+            if (!str) reject();
             message.reply(str);
-        }).catch(function() {
+        }).catch(function () {
             console.log("error")
         })
     }
+
 });
 
 //login
 bot.login(token);
+
+
