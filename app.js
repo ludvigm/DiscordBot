@@ -2,9 +2,13 @@
 const discord = require('discord.js');
 const Promise = require('promise');
 const reply = require('./lib/commandResponses');
-const vision = require('./lib/visionapi');
+const schedule = require('./lib/eventSchedueler');
+const vision = require('./lib/externalAPIs/visionapi');
 
 require('dotenv').config();
+
+// Connect to mongo
+require('./lib/mongo').initialize();
 
 // import the discord.js module
 const Discord = require('discord.js');
@@ -48,7 +52,7 @@ bot.on('message', message => {
     }
 
     if (message.content === '!ingame') {
-        reply.whoison(bot.users, message);
+        reply.ingame(bot.users, message);
     }
 
     if(message.content === '!catfact') {
@@ -62,7 +66,10 @@ bot.on('message', message => {
     if(message.content.startsWith('!yoda ')) {
         var sentence = message.content.substr(5);
         reply.yoda(message,sentence);
+    }
 
+    if(message.content.startsWith('!schedule')) {
+        schedule.scheduleEvent(message);
     }
 
 });
