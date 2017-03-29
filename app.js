@@ -8,7 +8,7 @@ const vision = require('./lib/externalAPIs/visionapi');
 require('dotenv').config();
 
 // Connect to mongo
-require('./lib/mongo').initialize();
+require('./lib/mongoHelper').initialize();
 
 // import the discord.js module
 const Discord = require('discord.js');
@@ -68,8 +68,19 @@ bot.on('message', message => {
         reply.yoda(message,sentence);
     }
 
-    if(message.content.startsWith('!schedule')) {
-        schedule.scheduleEvent(message);
+    if(message.content.startsWith('!newevent') || message.content.startsWith('!createevent')) {
+        schedule.scheduleEvent(message)
+            .then(function() {
+               reply.scheduleEvent(message);
+            })
+            .catch(function(err) {
+                console.log(err);
+            });
+        //Reply with "Event scheduled for YYDD..." etc.
+    }
+
+    if(message.content.startsWith('!showevents')) {
+        reply.listEvents(message)
     }
 
 });
